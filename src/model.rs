@@ -305,7 +305,7 @@ pub struct OrderTradeEvent {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TradesEvent { 
+pub struct AggTradeEvent { 
     #[serde(rename = "e")]
     pub event_type: String,
 
@@ -339,7 +339,44 @@ pub struct TradesEvent {
     #[serde(skip_serializing, rename = "M")]
     pub m_ignore: bool
 }
-	
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TradeEvent { 
+    #[serde(rename = "e")]
+    pub event_type: String,
+
+    #[serde(rename = "E")]
+    pub event_time: u64,
+
+    #[serde(rename = "s")]
+    pub symbol: String,
+
+    #[serde(rename = "t")]
+    pub trade_id: u32,
+
+    #[serde(rename = "p")]
+    pub price: String,
+
+    #[serde(rename = "q")]
+    pub qty: String,
+
+    #[serde(rename = "b")]
+    pub buyer_order_id: u32,
+
+    #[serde(rename = "a")]
+    pub seller_order_id: u32,
+
+    #[serde(rename = "T")]
+    pub trade_order_time: u64,
+
+    #[serde(rename = "m")]
+    pub is_buyer_maker: bool,
+
+    #[serde(skip_serializing, rename = "M")]
+    pub m_ignore: bool
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct KlineEvent { 

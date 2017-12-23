@@ -8,13 +8,17 @@ use tungstenite::protocol::WebSocket;
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::{Response};
 
+// https://github.com/binance-exchange/binance-official-api-docs/blob/master/web-socket-streams.md
+
 static WEBSOCKET_URL : &'static str = "wss://stream.binance.com:9443/ws/";
 
 static OUTBOUND_ACCOUNT_INFO : &'static str = "outboundAccountInfo";
 static EXECUTION_REPORT : &'static str = "executionReport";
 
 static KLINE : &'static str = "kline";
+static DEPTH : &'static str = "depth";
 static AGGREGATED_TRADE : &'static str = "aggTrade";
+static TRADE : &'static str = "trade";
 
 pub trait UserStreamEventHandler {
     fn account_update_handler(&self, event: &AccountUpdateEvent);
@@ -22,7 +26,8 @@ pub trait UserStreamEventHandler {
 }
 
 pub trait MarketEventHandler {
-    fn aggregated_trades_handler(&self, event: &TradesEvent);
+    fn aggregated_trades_handler(&self, event: &AggTradeEvent);
+    fn trade_handler(&self, event: &TradeEvent);
 }
 
 pub trait KlineEventHandler {
@@ -101,10 +106,16 @@ impl WebSockets {
                         h.order_trade_handler(&order_trade);
                     }
                 } else if msg.find(AGGREGATED_TRADE) != None {
-                    let trades: TradesEvent = from_str(msg.as_str()).unwrap();
+                    let trades: AggTradeEvent = from_str(msg.as_str()).unwrap();
 
                     if let Some(ref h) = self.market_handler {
                         h.aggregated_trades_handler(&trades);
+                    }
+                } else if msg.find(TRADE) != None {
+                    let trade: TradeEvent = from_str(msg.as_str()).unwrap();
+
+                    if let Some(ref h) = self.market_handler {
+                        h.trade_handler(&trade);
                     }
                 } else if msg.find(KLINE) != None {
                     let kline: KlineEvent = from_str(msg.as_str()).unwrap();
