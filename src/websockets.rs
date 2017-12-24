@@ -19,6 +19,7 @@ static KLINE : &'static str = "kline";
 static DEPTH : &'static str = "depth";
 static AGGREGATED_TRADE : &'static str = "aggTrade";
 static TRADE : &'static str = "trade";
+static DEPTH_DIFF : &'static str = "depth";
 
 pub trait UserStreamEventHandler {
     fn account_update_handler(&self, event: &AccountUpdateEvent);
@@ -28,6 +29,7 @@ pub trait UserStreamEventHandler {
 pub trait MarketEventHandler {
     fn aggregated_trades_handler(&self, event: &AggTradeEvent);
     fn trade_handler(&self, event: &TradeEvent);
+    fn depth_diff_handler(&self, event: &DepthDiffEvent);
 }
 
 pub trait KlineEventHandler {
@@ -123,7 +125,13 @@ impl WebSockets {
                     if let Some(ref h) = self.kline_handler {
                         h.kline_handler(&kline);
                     }
-                }                
+                } else if msg.find(DEPTH_DIFF) != None {
+                    let depth_diff: DepthDiffEvent = from_str(msg.as_str()).unwrap();
+
+                    if let Some(ref h) = self.market_handler {
+                        h.depth_diff_handler(&depth_diff);
+                    }
+                }
             }
         }
     }

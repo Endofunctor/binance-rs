@@ -379,6 +379,31 @@ pub struct TradeEvent {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DepthDiffEvent {
+    #[serde(rename = "e")]
+    pub event_type: String,
+
+    #[serde(rename = "E")]
+    pub event_time: u64,
+
+    #[serde(rename = "s")]
+    pub symbol: String,
+
+    #[serde(rename = "U")]
+    pub first_update_id: u32,
+
+    #[serde(rename = "u")]
+    pub final_update_id: u32,
+
+    #[serde(rename = "b")]
+    pub bids: Vec<Bids>,
+
+    #[serde(rename = "a")]
+    pub asks: Vec<Asks>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct KlineEvent { 
     #[serde(rename = "e")]
     pub event_type: String,
