@@ -8,6 +8,8 @@ use tungstenite::protocol::WebSocket;
 use tungstenite::client::AutoStream;
 use tungstenite::handshake::client::{Response};
 
+// https://github.com/binance-exchange/binance-official-api-docs/blob/master/web-socket-streams.md
+
 static WEBSOCKET_URL : &'static str = "wss://stream.binance.com:9443/ws/";
 
 static OUTBOUND_ACCOUNT_INFO : &'static str = "outboundAccountInfo";
@@ -15,6 +17,9 @@ static EXECUTION_REPORT : &'static str = "executionReport";
 
 static KLINE : &'static str = "kline";
 static AGGREGATED_TRADE : &'static str = "aggTrade";
+static TRADE : &'static str = "trade";
+static DEPTH_DIFF : &'static str = "depthUpdate";
+static ORDERBOOK : &'static str = "lastUpdateId";
 
 pub trait UserStreamEventHandler {
     fn account_update_handler(&self, event: &AccountUpdateEvent);
@@ -22,7 +27,10 @@ pub trait UserStreamEventHandler {
 }
 
 pub trait MarketEventHandler {
-    fn aggregated_trades_handler(&self, event: &TradesEvent);
+    fn aggregated_trades_handler(&self, event: &AggTradeEvent);
+    fn trade_handler(&self, event: &TradeEvent);
+    fn partial_orderbook_handler(&self, orderbook: &OrderBook);
+    fn depth_diff_handler(&self, event: &DepthDiffEvent);
 }
 
 pub trait KlineEventHandler {
@@ -87,7 +95,7 @@ impl WebSockets {
         loop {
             if let Some(ref mut socket) = self.socket {
                 let msg: String = socket.0.read_message().unwrap().into_text().unwrap();
-                
+
                 if msg.find(OUTBOUND_ACCOUNT_INFO) != None {
                     let account_update: AccountUpdateEvent = from_str(msg.as_str()).unwrap();
 
@@ -101,10 +109,16 @@ impl WebSockets {
                         h.order_trade_handler(&order_trade);
                     }
                 } else if msg.find(AGGREGATED_TRADE) != None {
-                    let trades: TradesEvent = from_str(msg.as_str()).unwrap();
+                    let trades: AggTradeEvent = from_str(msg.as_str()).unwrap();
 
                     if let Some(ref h) = self.market_handler {
                         h.aggregated_trades_handler(&trades);
+                    }
+                } else if msg.find(TRADE) != None {
+                    let trade: TradeEvent = from_str(msg.as_str()).unwrap();
+
+                    if let Some(ref h) = self.market_handler {
+                        h.trade_handler(&trade);
                     }
                 } else if msg.find(KLINE) != None {
                     let kline: KlineEvent = from_str(msg.as_str()).unwrap();
@@ -112,7 +126,19 @@ impl WebSockets {
                     if let Some(ref h) = self.kline_handler {
                         h.kline_handler(&kline);
                     }
-                }                
+                } else if msg.find(ORDERBOOK) != None {
+                    let partial_orderbook: OrderBook = from_str(msg.as_str()).unwrap();
+
+                    if let Some(ref h) = self.market_handler {
+                        h.partial_orderbook_handler(&partial_orderbook);
+                    }
+                } else if msg.find(DEPTH_DIFF) != None {
+                    let depth_diff: DepthDiffEvent = from_str(msg.as_str()).unwrap();
+
+                    if let Some(ref h) = self.market_handler {
+                        h.depth_diff_handler(&depth_diff);
+                    }
+                }
             }
         }
     }
