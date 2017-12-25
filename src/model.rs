@@ -305,11 +305,7 @@ pub struct OrderTradeEvent {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-<<<<<<< HEAD
-pub struct TradesEvent {
-=======
-pub struct AggTradeEvent { 
->>>>>>> WEBSOCKET_IMPROVE
+pub struct AggTradeEvent {
     #[serde(rename = "e")]
     pub event_type: String,
 
