@@ -342,7 +342,7 @@ pub struct AggTradeEvent {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TradeEvent { 
+pub struct TradeEvent {
     #[serde(rename = "e")]
     pub event_type: String,
 
@@ -404,7 +404,7 @@ pub struct DepthDiffEvent {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct KlineEvent { 
+pub struct KlineEvent {
     #[serde(rename = "e")]
     pub event_type: String,
 
