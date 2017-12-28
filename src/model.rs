@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerTime
@@ -77,27 +79,67 @@ pub struct OrderBook
     pub asks: Vec<Asks>
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Bids
 {
-    pub price: String,
-    pub qty: String,
+    pub price: f32,
+    pub qty: f32,
 
     // Never serialized.
     #[serde(skip_serializing)]
     ignore: Vec<String>
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl PartialOrd for Bids {
+    fn partial_cmp(&self, other: &Bids) -> Option<Ordering> {
+        Some(self.price.partial_cmp(&other.price).unwrap())
+    }
+}
+
+impl Ord for Bids {
+    fn cmp(&self, other: &Bids) -> Ordering {
+        self.price.partial_cmp(&other.price).unwrap()
+    }
+}
+
+impl PartialEq for Bids {
+    fn eq(&self, other: &Bids) -> bool {
+        self.price == other.price
+    }
+}
+
+impl Eq for Bids {}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Asks
 {
-    pub price: String,
-    pub qty: String,
+    pub price: f32,
+    pub qty: f32,
 
     // Never serialized.
     #[serde(skip_serializing)]
     ignore: Vec<String>
 }
+
+impl PartialOrd for Asks {
+    fn partial_cmp(&self, other: &Asks) -> Option<Ordering> {
+        Some(self.price.partial_cmp(&other.price).unwrap())
+    }
+}
+
+impl Ord for Asks {
+    fn cmp(&self, other: &Asks) -> Ordering {
+        self.price.partial_cmp(&other.price).unwrap()
+    }
+}
+
+impl PartialEq for Asks {
+    fn eq(&self, other: &Asks) -> bool {
+        self.price == other.price
+    }
+}
+
+impl Eq for Asks {}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -240,10 +282,10 @@ pub struct OrderTradeEvent {
     pub time_in_force: String,
 
     #[serde(rename = "q")]
-    pub qty: String,
+    pub qty: f32,
 
     #[serde(rename = "p")]
-    pub price: String,
+    pub price: f32,
 
     #[serde(skip_serializing, rename = "P")]
     pub p_ignore: String,
@@ -270,13 +312,13 @@ pub struct OrderTradeEvent {
     pub order_id: u32,
 
     #[serde(rename = "l")]
-    pub qty_last_filled_trade: String,
+    pub qty_last_filled_trade: f32,
 
     #[serde(rename = "z")]
-    pub accumulated_qty_filled_trades: String,
+    pub accumulated_qty_filled_trades: f32,
 
     #[serde(rename = "L")]
-    pub price_last_filled_trade: String,
+    pub price_last_filled_trade: f32,
 
     #[serde(rename = "n")]
     pub commission: String,
@@ -319,10 +361,10 @@ pub struct AggTradeEvent {
     pub aggregated_trade_id: u32,
 
     #[serde(rename = "p")]
-    pub price: String,
+    pub price: f32,
 
     #[serde(rename = "q")]
-    pub qty: String,
+    pub qty: f32,
 
     #[serde(rename = "f")]
     pub first_break_trade_id: u32,
@@ -356,10 +398,10 @@ pub struct TradeEvent {
     pub trade_id: u32,
 
     #[serde(rename = "p")]
-    pub price: String,
+    pub price: f32,
 
     #[serde(rename = "q")]
-    pub qty: String,
+    pub qty: f32,
 
     #[serde(rename = "b")]
     pub buyer_order_id: u32,
@@ -377,7 +419,7 @@ pub struct TradeEvent {
     pub m_ignore: bool
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DepthDiffEvent {
     #[serde(rename = "e")]
@@ -390,10 +432,10 @@ pub struct DepthDiffEvent {
     pub symbol: String,
 
     #[serde(rename = "U")]
-    pub first_update_id: u32,
+    pub first_update_id: u64,
 
     #[serde(rename = "u")]
-    pub final_update_id: u32,
+    pub final_update_id: u64,
 
     #[serde(rename = "b")]
     pub bids: Vec<Bids>,
